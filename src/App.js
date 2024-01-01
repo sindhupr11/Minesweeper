@@ -1,10 +1,15 @@
-
+import React from 'react';
+import { SettingsContainer,	StatusContainer, BoardContainer } from './containers';
+import { Wrapper, Title } from './AppStyle';
 
 function App() {
   return (
-    <div className="App">
-
-    </div>
+    <Wrapper>
+      <Title>Minesweeper</Title>
+      <SettingsContainer />
+      <StatusContainer />
+      <BoardContainer />
+  </Wrapper>
   );
 }
 
