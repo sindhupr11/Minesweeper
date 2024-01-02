@@ -3,7 +3,20 @@ import { MIN_WIDTH, MAX_WIDTH, MIN_HEIGHT, MAX_HEIGHT, MIN_MINES } from '../../c
 import { Slider, Button } from '../shared';
 import { Wrapper, WidthWrapper, Width, HeightWrapper, Height, MinesWrapper, Mines } from './settingsStyle';
 
+<<<<<<< HEAD
 const Settings = ({ width,	height,	mineCount, maxMineCount, onChangeWidth, onChangeHeight, onChangeMines, onClickSet }) => {
+=======
+const Settings = ({
+	width,
+	height,
+	mineCount,
+	maxMineCount,
+	onChangeWidth,
+	onChangeHeight,
+	onChangeMines,
+	onClickSet
+}) => {
+>>>>>>> d756860d9e20ac6c79c768b6bfdd68c2d195c1f8
 	return (
 		<Wrapper>
 			<WidthWrapper>

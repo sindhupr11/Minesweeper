@@ -1,7 +1,19 @@
 import React from 'react';
 import { Wrapper, Mine,	ButtonWrapper, RestartButton, SettingsButton, Timer } from './statusStyle';
 
+<<<<<<< HEAD
 const Status = ({ leftMineCount, mineCount, resultEmoji, enableSettings, elapsedTime, onClickRestart, onClickSettings }) => {
+=======
+const Status = ({
+	leftMineCount,
+	mineCount,
+	resultEmoji,
+	enableSettings,
+	elapsedTime,
+	onClickRestart,
+	onClickSettings
+}) => {
+>>>>>>> d756860d9e20ac6c79c768b6bfdd68c2d195c1f8
 	return (
 		<Wrapper>
 			<Mine>💣 {leftMineCount} / {mineCount}</Mine>
