@@ -7,8 +7,6 @@ This is a simple implementation of the classic game Minesweeper.
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Introduction
 
