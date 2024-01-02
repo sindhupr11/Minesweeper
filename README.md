@@ -26,7 +26,7 @@ This project aims to provide a fun and interactive Minesweeper game that can be 
 1. Clone the repository:
 
     ```shell
-    git clone https://github.com/your-username/minesweeper.git
+    git clone https://github.com/sindhupr11/minesweeper.git
     ```
 
 2. Navigate to the project directory:
