@@ -2,7 +2,7 @@
 
 This is a simple implementation of the classic game Minesweeper.
 
-![Image Description](./public/ss.png)
+<img src="./public/ss.png" alt="Image Description" width="300" height="200">
 
 
 ## Table of Contents
