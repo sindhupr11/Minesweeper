@@ -2,6 +2,9 @@
 
 This is a simple implementation of the classic game Minesweeper.
 
+![Image Description](./public/ss.png)
+
+
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
