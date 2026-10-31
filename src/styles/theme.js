@@ -1,0 +1,31 @@
+export const THEMES = {
+	retro: {
+		id: 'retro',
+		name: 'Retro 95',
+		bodyBg: '#008080',
+		cardBg: '#c0c0c0',
+		cardBorder: '3px solid',
+		cardBorderTopLeft: '#ffffff',
+		cardBorderBottomRight: '#808080',
+		cardShadow: '4px 4px 10px rgba(0,0,0,0.5)',
+		cardRadius: '0px',
+		textColor: '#000000',
+		mutedText: '#333333',
+		panelBg: '#c0c0c0',
+		panelBorder: '2px solid',
+		cellCoveredBg: '#c0c0c0',
+		cellCoveredBorder: '2px solid',
+		cellCoveredHover: '#d0d0d0',
+		cellCoveredShadow: 'none',
+		cellRevealedBg: '#bdbdbd',
+		cellRevealedBorder: '1px solid #7b7b7b',
+		cellRevealedShadow: 'none',
+		cellExplodedBg: '#ff0000',
+		cellWrongFlagBg: '#ffa0a0',
+		digitalBg: '#000000',
+		digitalBorder: '2px inset #808080',
+		digitalColor: '#ff0000',
+		accentColor: '#000080',
+		accentHover: '#1010a0'
+	}
+};

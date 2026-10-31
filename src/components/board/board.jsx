@@ -1,14 +1,16 @@
 import React from 'react';
 import { CellContainer } from '../../containers';
-import { Wrapper } from './boardStyle';
+import { BoardContainerWrapper, Grid } from './boardStyle';
 
-const Board = ({ width, height,	onRightClickBoard}) => {
+const Board = ({ width, height, theme, onRightClickBoard }) => {
 	return (
-		<Wrapper widthSize={width} onContextMenu={onRightClickBoard}>
-			{Array(width * height).fill().map((v, i) => 
-				<CellContainer key={i} x={i % width} y={Math.floor(i / width)} />
-			)}
-		</Wrapper>
+		<BoardContainerWrapper>
+			<Grid widthSize={width} customTheme={theme} onContextMenu={onRightClickBoard}>
+				{Array(width * height).fill().map((_, i) => (
+					<CellContainer key={i} x={i % width} y={Math.floor(i / width)} />
+				))}
+			</Grid>
+		</BoardContainerWrapper>
 	);
 };
 

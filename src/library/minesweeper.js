@@ -1,27 +1,91 @@
 import { CODES } from '../constants';
 
-export const initBoard = (width, height, mineCount) => {
-	const candidates = Array(width * height).fill().map((v, i) => i);
-	const shuffle = [];
+/**
+ * Initializes a blank board where every cell is NOTHING
+ */
+export const initBoard = (width, height) => {
 	const boardData = [];
-
-	while (candidates.length > width * height - mineCount) {
-		const chosen = candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0];
-		shuffle.push(chosen);
-	}
-
 	for (let i = 0; i < height; i++) {
-		const rowData = Array(width).fill(CODES.NOTHING);
-		boardData.push(rowData);
+		boardData.push(Array(width).fill(CODES.NOTHING));
+	}
+	return boardData;
+};
+
+/**
+ * Populates mines on the board guaranteeing that first clicked tile (and its neighbors if possible) is safe
+ */
+export const populateMinesWithSafeZone = (boardData, width, height, mineCount, safeX, safeY) => {
+	const totalCells = width * height;
+	const safeIndices = new Set();
+
+	// Add safe center
+	safeIndices.add(safeY * width + safeX);
+
+	// Attempt to keep 8 neighbors safe if there is enough room for mines
+	const neighbors = [];
+	for (let dy = -1; dy <= 1; dy++) {
+		for (let dx = -1; dx <= 1; dx++) {
+			const nx = safeX + dx;
+			const ny = safeY + dy;
+			if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+				neighbors.push(ny * width + nx);
+			}
+		}
 	}
 
-	for (let i = 0; i < shuffle.length; i++) {
-		const x = shuffle[i] % width;
-		const y = Math.floor(shuffle[i] / width);
+	if (totalCells - neighbors.length >= mineCount) {
+		neighbors.forEach(idx => safeIndices.add(idx));
+	}
+
+	const candidates = [];
+	for (let i = 0; i < totalCells; i++) {
+		if (!safeIndices.has(i)) {
+			candidates.push(i);
+		}
+	}
+
+	// Shuffle candidates and pick mineCount
+	const mineIndices = [];
+	while (mineIndices.length < mineCount && candidates.length > 0) {
+		const randIndex = Math.floor(Math.random() * candidates.length);
+		const chosen = candidates.splice(randIndex, 1)[0];
+		mineIndices.push(chosen);
+	}
+
+	// Fallback if not enough non-neighbor candidates were available
+	if (mineIndices.length < mineCount) {
+		const remainingCandidates = [];
+		for (let i = 0; i < totalCells; i++) {
+			if (i !== safeY * width + safeX && !mineIndices.includes(i)) {
+				remainingCandidates.push(i);
+			}
+		}
+		while (mineIndices.length < mineCount && remainingCandidates.length > 0) {
+			const randIndex = Math.floor(Math.random() * remainingCandidates.length);
+			mineIndices.push(remainingCandidates.splice(randIndex, 1)[0]);
+		}
+	}
+
+	for (let i = 0; i < mineIndices.length; i++) {
+		const x = mineIndices[i] % width;
+		const y = Math.floor(mineIndices[i] / width);
 		boardData[y][x] = CODES.MINE;
 	}
 
 	return boardData;
+};
+
+export const isMineCode = (code) => {
+	return [
+		CODES.MINE,
+		CODES.MINE_FLAG,
+		CODES.MINE_QUESTION,
+		CODES.MINE_EXPLODED
+	].includes(code);
+};
+
+export const isFlagCode = (code) => {
+	return code === CODES.FLAG || code === CODES.MINE_FLAG;
 };
 
 export const getNextCellCode = (code) => {
@@ -56,48 +120,150 @@ export const getFlagIncDec = (code) => {
 	}
 };
 
-export const expandOpenedCell = (boardData, x, y) => {
+export const getAdjacentMineCount = (boardData, x, y) => {
+	const height = boardData.length;
+	const width = boardData[0].length;
+	let count = 0;
+
+	for (let dy = -1; dy <= 1; dy++) {
+		for (let dx = -1; dx <= 1; dx++) {
+			if (dx === 0 && dy === 0) continue;
+			const nx = x + dx;
+			const ny = y + dy;
+			if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+				if (isMineCode(boardData[ny][nx])) {
+					count++;
+				}
+			}
+		}
+	}
+	return count;
+};
+
+export const expandOpenedCell = (boardData, startX, startY) => {
+	const height = boardData.length;
+	const width = boardData[0].length;
 	let openedCellCount = 0;
 
-	// Define function to get mine count
-	const getMineCount = (x, y) => {
-		let aroundCode = [];
-		let mineCount = 0;
+	const queue = [{ x: startX, y: startY }];
 
-		aroundCode = boardData[y - 1] ? aroundCode.concat(boardData[y - 1][x - 1], boardData[y - 1][x], boardData[y - 1][x + 1]) : aroundCode;
-		aroundCode = aroundCode.concat(boardData[y][x - 1], boardData[y][x + 1]);
-		aroundCode = boardData[y + 1] ? aroundCode.concat(boardData[y + 1][x - 1], boardData[y + 1][x], boardData[y + 1][x + 1]) : aroundCode;
+	while (queue.length > 0) {
+		const { x, y } = queue.shift();
 
-		mineCount = aroundCode.filter(v => [
-			CODES.MINE,
-			CODES.MINE_FLAG,
-			CODES.MINE_QUESTION
-		].includes(v)).length;
+		if (x < 0 || x >= width || y < 0 || y >= height) continue;
+		if (boardData[y][x] !== CODES.NOTHING) continue;
 
-		return mineCount;
-	};
-
-	// Using DFS algorithm to expand
-	const dfsSearch = (x, y) => {
-		if (boardData[y][x] !== CODES.NOTHING) {
-			return;
-		}
-
-		boardData[y][x] = getMineCount(x, y);
+		const mineCount = getAdjacentMineCount(boardData, x, y);
+		boardData[y][x] = mineCount;
 		openedCellCount++;
 
-		let aroundPoint = [];
-		aroundPoint = boardData[y - 1] ? aroundPoint.concat({ x: x - 1, y: y - 1 }, { x, y: y - 1 }, { x: x + 1, y: y - 1 }) : aroundPoint;
-		aroundPoint = aroundPoint.concat({ x: x - 1, y }, { x: x + 1, y });
-		aroundPoint = boardData[y + 1] ? aroundPoint.concat({ x: x - 1, y: y + 1 }, { x, y: y + 1 }, { x: x + 1, y: y + 1 }) : aroundPoint;
-
-		if (boardData[y][x] === 0) {
-			aroundPoint.forEach((v) => {
-				dfsSearch(v.x, v.y);
-			});
+		if (mineCount === 0) {
+			for (let dy = -1; dy <= 1; dy++) {
+				for (let dx = -1; dx <= 1; dx++) {
+					if (dx === 0 && dy === 0) continue;
+					const nx = x + dx;
+					const ny = y + dy;
+					if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+						if (boardData[ny][nx] === CODES.NOTHING) {
+							queue.push({ x: nx, y: ny });
+						}
+					}
+				}
+			}
 		}
-	};
+	}
 
-	dfsSearch(x, y);
 	return { boardData, openedCellCount };
+};
+
+export const chordCell = (boardData, x, y) => {
+	const height = boardData.length;
+	const width = boardData[0].length;
+	const cellValue = boardData[y][x];
+
+	if (cellValue <= 0 || cellValue > 8) {
+		return { boardData, openedCellCount: 0, hitMine: false, explodedX: null, explodedY: null };
+	}
+
+	// Count adjacent flags
+	let flagCount = 0;
+	const adjacentNeighbors = [];
+
+	for (let dy = -1; dy <= 1; dy++) {
+		for (let dx = -1; dx <= 1; dx++) {
+			if (dx === 0 && dy === 0) continue;
+			const nx = x + dx;
+			const ny = y + dy;
+			if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+				adjacentNeighbors.push({ x: nx, y: ny, code: boardData[ny][nx] });
+				if (isFlagCode(boardData[ny][nx])) {
+					flagCount++;
+				}
+			}
+		}
+	}
+
+	if (flagCount !== cellValue) {
+		return { boardData, openedCellCount: 0, hitMine: false, explodedX: null, explodedY: null };
+	}
+
+	let totalOpened = 0;
+	let hitMine = false;
+	let explodedX = null;
+	let explodedY = null;
+
+	for (const neighbor of adjacentNeighbors) {
+		const { x: nx, y: ny, code } = neighbor;
+		// If unflagged and is a mine -> explosion
+		if (code === CODES.MINE || code === CODES.MINE_QUESTION) {
+			hitMine = true;
+			explodedX = nx;
+			explodedY = ny;
+			break;
+		}
+		// If unflagged and is NOTHING -> expand
+		if (code === CODES.NOTHING) {
+			const res = expandOpenedCell(boardData, nx, ny);
+			totalOpened += res.openedCellCount;
+		}
+	}
+
+	return { boardData, openedCellCount: totalOpened, hitMine, explodedX, explodedY };
+};
+
+export const revealBoardOnLoss = (boardData, explodedX, explodedY) => {
+	const height = boardData.length;
+	const width = boardData[0].length;
+
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const code = boardData[y][x];
+
+			if (x === explodedX && y === explodedY) {
+				boardData[y][x] = CODES.MINE_EXPLODED;
+			} else if (code === CODES.MINE || code === CODES.MINE_QUESTION) {
+				// Reveal unflagged mines
+				boardData[y][x] = CODES.MINE;
+			} else if (code === CODES.FLAG) {
+				// Flagged cell that was NOT a mine -> wrong flag
+				boardData[y][x] = CODES.WRONG_FLAG;
+			}
+		}
+	}
+	return boardData;
+};
+
+export const flagAllMinesOnWin = (boardData) => {
+	const height = boardData.length;
+	const width = boardData[0].length;
+
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const code = boardData[y][x];
+			if (code === CODES.MINE || code === CODES.MINE_QUESTION) {
+				boardData[y][x] = CODES.MINE_FLAG;
+			}
+		}
+	}
+	return boardData;
 };
