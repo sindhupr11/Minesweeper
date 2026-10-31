@@ -2,11 +2,12 @@
 
 This is a simple implementation of the classic game Minesweeper.
 
-![Image Description](./public/ss.png)
+![Screenshot](./public/image.png)
 
 ## Table of Contents
 - [Introduction](#introduction)
 - [Features](#features)
+- [How to Play](#how-to-play)
 - [Installation](#installation)
 - [Usage](#usage)
 
@@ -23,30 +24,39 @@ This project aims to provide a fun and interactive Minesweeper game that can be 
 - Timer to track your progress
 - High score tracking
 
+## How to Play
+
+- Left-click or tap in Dig Mode to reveal a tile
+- Right-click or tap in Flag Mode to flag/unflag a suspected mine
+- Click a revealed number to chord and reveal adjacent tiles when flags match
+- Start a fresh game at any time with New Game
+
 ## Installation
 
 1. Clone the repository:
 
-    ```shell
-    git clone https://github.com/sindhupr11/minesweeper.git
-    ```
+   ```bash
+   git clone https://github.com/sindhupr11/minesweeper.git
+   ```
 
 2. Navigate to the project directory:
 
-    ```shell
-    cd minesweeper
-    ```
+   ```bash
+   cd minesweeper
+   ```
 
-3. Install the dependencies:
+3. Install dependencies:
 
-    ```shell
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 ## Usage
 
-To start the game, run the following command: 
+Start the development server:
 
-```shell
+```bash
 npm start
 ```
+
+Runs the app in development mode at [http://localhost:3000](http://localhost:3000).
